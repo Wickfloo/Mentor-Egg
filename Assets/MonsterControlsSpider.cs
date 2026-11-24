@@ -14,6 +14,10 @@ namespace Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts
         private Rigidbody2D _rb;
         private SpriteRenderer _spriteRenderer;
 
+        [Header("Key Bindings Configuration")]
+        [Tooltip("Assign your KeyBinder component here, or leave blank to find it automatically.")]
+        [SerializeField] private KeyBinder keyConfig;
+
         [Header("Death Visual Effects")]
         public float FlashSpeed = 15f;
         public Color FlashColor = Color.red;
@@ -33,12 +37,19 @@ namespace Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts
             {
                 _originalColor = _spriteRenderer.color;
             }
+
+            if (keyConfig == null)
+            {
+                keyConfig = FindObjectOfType<KeyBinder>();
+            }
         }
 
         public void Update()
         {
-            // Manual Reset: Pressing R instantly teleports to the last active checkpoint
-            if (Input.GetKeyDown(KeyCode.R))
+            if (keyConfig == null) return;
+
+            // Manual Reset: Pressing configured Respawn key instantly teleports to checkpoint
+            if (Input.GetKeyDown(keyConfig.respawnR))
             {
                 if (DeathTrigger.ActiveSpawnPoint != null)
                 {
@@ -80,10 +91,7 @@ namespace Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts
             Move();
             Attack();
 
-            if (Input.GetKeyDown(KeyCode.I)) { _animation.SetState(MonsterState.Idle); }
-            if (Input.GetKeyDown(KeyCode.D)) { _animation.SetState(MonsterState.Die); }
-            if (Input.GetKeyUp(KeyCode.H)) { _animation.Hit(); }
-            if (Input.GetKeyUp(KeyCode.L)) { EffectManager.Instance.Blink(_monster); }
+
         }
 
         private void ResetAfterRespawn()
@@ -107,19 +115,19 @@ namespace Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts
         {
             Vector2 rawInput = Vector2.zero;
 
-            if (Input.GetKey(KeyCode.LeftArrow)) { rawInput.x = -1; }
-            else if (Input.GetKey(KeyCode.RightArrow)) { rawInput.x = 1; }
+            if (Input.GetKey(keyConfig.moveLeft)) { rawInput.x = -1; }
+            else if (Input.GetKey(keyConfig.moveRight)) { rawInput.x = 1; }
 
-            if (Input.GetKey(KeyCode.UpArrow)) { rawInput.y = 1; }
-            else if (Input.GetKey(KeyCode.DownArrow)) { rawInput.y = -1; }
+            if (Input.GetKey(keyConfig.moveUp)) { rawInput.y = 1; }
+            else if (Input.GetKey(keyConfig.moveDown)) { rawInput.y = -1; }
 
             _controller.Input = rawInput;
         }
 
         private void Attack()
         {
-            if (Input.GetKeyDown(KeyCode.A)) { _animation.Attack(); }
-            if (Input.GetKeyDown(KeyCode.F)) { _animation.Fire(); }
+            if (Input.GetKeyDown(keyConfig.attackA)) { _animation.Attack(); }
+            if (Input.GetKeyDown(keyConfig.fireF)) { _animation.Fire(); }
         }
     }
 }
